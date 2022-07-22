@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use skim::prelude::*;
 use std::collections::HashMap;
 use std::fs;
+use tmux_interface::TmuxCommand;
 
 #[derive(Serialize, Deserialize)]
 struct Config {
@@ -14,6 +15,12 @@ struct Project {
     path: String,
     group: String,
     group_dir: String,
+}
+
+impl Project {
+    fn session_name(&self) -> Cow<str> {
+        Cow::Borrowed(&self.path)
+    }
 }
 
 impl SkimItem for Project {
@@ -48,14 +55,16 @@ fn main() {
                 group_dir: dir.to_owned(),
             }))
             .unwrap()
-            // vec.push(format!("[{}] {}", name, file.unwrap().path().display()));
-            // println!("in directory {} is the folder {}", dir, file.unwrap().path().display());
         }
     }
     drop(tx);
 
     let selected_items = Skim::run_with(&options, Some(rx))
-        .map(|out| out.selected_items)
+        .map(|out| match out.final_key {
+            Key::ESC => Vec::new(),
+            Key::Enter => out.selected_items,
+            _ => Vec::new(),
+        })
         .unwrap_or_else(|| Vec::new())
         .iter()
         .map(|selected_item| {
@@ -67,16 +76,37 @@ fn main() {
         })
         .collect::<Vec<Project>>();
 
-    for item in selected_items {
-        println!("Group {}, Group Dir {}, Path {}", item.group, item.group_dir, item.path);
-        dbg!(item);
+    let selected = selected_items.iter().next();
+    if !selected.is_some() {
+        println!("Nothing selected");
+        return;
     }
 
-    // if selected_items.len() > 1 {
-    //     panic!("expected only one result")
-    // } else if selected_items.len() == 0 {
-    //     println!("No item selected");
-    // } else {
-    //     println!("Group {}, Group Dir {}, Path {}", selected_items[0].group, selected_items[0].group_dir, selected_items[0].path)
-    // }
+    let item = selected.unwrap();
+    println!(
+        "Group {}, Group Dir {}, Path {}",
+        item.group, item.group_dir, item.path
+    );
+
+    let tmux = TmuxCommand::new();
+
+    let has_session = tmux
+        .has_session()
+        .target_session(item.session_name())
+        .output()
+        .unwrap()
+        .success();
+
+    if !has_session {
+        tmux.new_session()
+            .detached()
+            .session_name(item.session_name())
+            .output()
+            .unwrap();
+    }
+
+    tmux.switch_client()
+        .target_session(item.session_name())
+        .output()
+        .unwrap();
 }
