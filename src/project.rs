@@ -24,16 +24,14 @@ pub mod selector {
         }
 
         pub fn session_name(&self) -> Cow<str> {
-            Cow::Borrowed(&self.path)
+            let path = Path::new(&self.path);
+            Cow::from(path.file_name().expect("Is not a directory").to_str().unwrap())
         }
     }
 
     impl SkimItem for Project {
         fn text(&self) -> Cow<str> {
-            let path = Path::new(&self.path);
-            let fila_name = path.file_name().expect("Is not a directory");
-            Cow::from(format!("[{}] {}", &self.group, fila_name.to_str().unwrap()))
-            // Cow::Borrowed(format!("{}", &self.path))
+            Cow::from(format!("[{}] {}", &self.group, &self.session_name()))
         }
 
         fn preview(&self, _context: PreviewContext) -> ItemPreview {
