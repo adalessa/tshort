@@ -1,7 +1,8 @@
 {
   "directories": {
-    "go-adalessa": "~/code/go/src/github.com/adalessa",
-    "js": "~/code/js",
-    "php": "~/code/php"
+    "GO-adalessa": "~/code/go/src/github.com/adalessa",
+    "Js": "~/code/js",
+    "PHP": "~/code/php",
+    "Rust": "~/code/rust"
   }
 }
