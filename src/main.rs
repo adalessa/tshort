@@ -9,6 +9,7 @@ use crate::utils::config::{load, Config};
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
+use itertools::Itertools;
 
 fn main() {
     let config: Config = load("~/.config/projects.json");
@@ -73,8 +74,9 @@ fn main() {
 
         "list" => {
             let mut projects_names: Vec<String> = Vec::<String>::new();
-            for val in projects.values() {
-                projects_names.push(val.session_name().to_string());
+
+            for key in projects.keys().sorted() {
+                projects_names.push(projects[key].session_name().to_string());
             }
 
             println!("{}", projects_names.join("|"));
