@@ -8,10 +8,18 @@ pub mod session {
         connect(&item.session_name())
     }
 
-    pub fn connect(session_name: &str) -> bool {
-        let tmux = TmuxCommand::new();
+    pub fn session_exists(session_name: &str) -> bool {
+        TmuxCommand::new()
+            .has_session()
+            .target_session(session_name)
+            .output()
+            .unwrap()
+            .success()
+    }
 
-        tmux.switch_client()
+    pub fn connect(session_name: &str) -> bool {
+        TmuxCommand::new()
+            .switch_client()
             .target_session(session_name)
             .output()
             .unwrap()
