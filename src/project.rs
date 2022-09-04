@@ -29,7 +29,7 @@ pub mod selector {
                 .to_str()
                 .unwrap();
 
-            Cow::from(format!("[{}] {}", &self.group, path))
+            Cow::from(format!("[{}] {}", &self.group, str::replace(path, ".", "_")))
         }
 
         pub fn path(&self) -> &Path {
