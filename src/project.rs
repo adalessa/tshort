@@ -8,8 +8,9 @@ pub mod selector {
     };
 
     use crate::utils::config::Config;
+    use serde::{Deserialize, Serialize};
 
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub struct Project {
         path: String,
         group: String,
@@ -17,21 +18,28 @@ pub mod selector {
 
     impl Project {
         pub fn new(path: String, group: String) -> Self {
-            Self {
-                path,
-                group,
-            }
+            Self { path, group }
         }
 
         pub fn session_name(&self) -> Cow<str> {
             let path = Path::new(&self.path);
-            Cow::from(path.file_name().expect("Is not a directory").to_str().unwrap())
+            let path = path
+                .file_name()
+                .expect("Is not a directory")
+                .to_str()
+                .unwrap();
+
+            Cow::from(format!("[{}] {}", &self.group, path))
+        }
+
+        pub fn path(&self) -> &Path {
+            Path::new(&self.path)
         }
     }
 
     impl SkimItem for Project {
         fn text(&self) -> Cow<str> {
-            Cow::from(format!("[{}] {}", &self.group, &self.session_name()))
+            self.session_name()
         }
 
         fn preview(&self, _context: PreviewContext) -> ItemPreview {

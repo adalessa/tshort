@@ -1,28 +1,46 @@
 pub mod session {
 
-    use tmux_interface::TmuxCommand;
+    use tmux_interface::{NewSession, TmuxCommand};
+    use crate::project::selector::Project;
 
-    pub fn create_or_connect(session_name: &str) {
+    pub fn create_or_connect(item: Project) -> bool {
+        create(item.to_owned());
+        connect(&item.session_name())
+    }
+
+    pub fn connect(session_name: &str) -> bool {
+        let tmux = TmuxCommand::new();
+
+        tmux.switch_client()
+            .target_session(session_name)
+            .output()
+            .unwrap()
+            .success()
+    }
+
+
+    pub fn create(item: Project) -> bool {
         let tmux = TmuxCommand::new();
 
         let has_session = tmux
             .has_session()
-            .target_session(session_name)
+            .target_session(item.session_name())
             .output()
             .unwrap()
             .success();
 
         if !has_session {
-            tmux.new_session()
+            return NewSession::new()
+                .session_name(item.session_name())
                 .detached()
-                .session_name(session_name)
+                .start_directory(item.path().to_str().unwrap())
+                .shell_command("nvim")
                 .output()
-                .unwrap();
+                .unwrap()
+                .success()
+            ;
         }
 
-        tmux.switch_client()
-            .target_session(session_name)
-            .output()
-            .unwrap();
+        return has_session;
     }
 }

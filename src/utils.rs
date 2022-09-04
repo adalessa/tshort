@@ -14,6 +14,7 @@ pub mod config {
     }
 
     pub fn load(path: &str) -> Config {
+        let path = shellexpand::tilde(path).to_string();
         let data = fs::read_to_string(path).expect("Unable to read file");
         serde_json::from_str(&data).expect("JSON does not have correct format.")
     }
