@@ -7,6 +7,9 @@ homepage = "https://github.com/adalessa/tshort"
 respository = "https://github.com/adalessa/tshort"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
+exclude = [
+    "config.json",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
