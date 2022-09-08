@@ -1,6 +1,11 @@
 # Tshort
 
-Lo mismo pero mejor y en RUST
+## Instalacion
+
+`cargo install tshort`
+
+
+## Configuracion
 
 Configurar los projectos en tu director `~/.config/projects.json`
 
