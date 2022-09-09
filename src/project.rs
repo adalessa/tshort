@@ -49,7 +49,7 @@ pub mod selector {
 
     pub fn run(config: Config) -> Result<Project, io::Error> {
         let options = SkimOptionsBuilder::default()
-            .height(Some("50%"))
+            .height(Some("100%"))
             .multi(false)
             .build()
             .unwrap();
