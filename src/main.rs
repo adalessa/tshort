@@ -22,7 +22,17 @@ fn main() {
             Err(_) => HashMap::new(),
         };
 
-    projects.retain(|_k, v| {session_exists(&v.session_name().to_string())});
+    projects.retain(|_k, v| session_exists(&v.session_name().to_string()));
+
+    if std::env::args().len() == 1 {
+        let item = match project::selector::run(config) {
+            Ok(item) => item,
+            Err(_e) => return,
+        };
+
+        create_or_connect(item);
+        return;
+    }
 
     match std::env::args().nth(1).unwrap().as_str() {
         "bind" => {
@@ -78,18 +88,17 @@ fn main() {
             let mut projects_names: Vec<String> = Vec::<String>::new();
 
             projects.keys().sorted().for_each(|key| {
-                projects_names.push(format!("{} [{}]", projects[key].session_name().to_string(), key));
+                projects_names.push(format!(
+                    "{} [{}]",
+                    projects[key].session_name().to_string(),
+                    key
+                ));
             });
 
             println!("{}", projects_names.join("|"));
         }
         _ => {
-            let item = match project::selector::run(config) {
-                Ok(item) => item,
-                Err(_e) => return,
-            };
-
-            create_or_connect(item);
+            panic!("Parameter provided not valid");
         }
     };
 }
