@@ -42,28 +42,35 @@ fn main() {
             for (group, dir) in config.directories().iter() {
                 let expended_dir = shellexpand::tilde(dir);
                 for file in fs::read_dir(expended_dir.to_string()).unwrap() {
-                    project_list.push(
-                        project::selector::Project::new(
-                            file.unwrap().path().display().to_string(),
-                            group.to_owned()
-                        )
-                    )
+                    project_list.push(project::selector::Project::new(
+                        file.unwrap().path().display().to_string(),
+                        group.to_owned(),
+                    ))
                 }
             }
-            let rofi_list = project_list.iter().map(|item| item.session_name().to_string()).collect::<Vec<String>>();
+            let rofi_list = project_list
+                .iter()
+                .map(|item| item.session_name().to_string())
+                .collect::<Vec<String>>();
+
             match rofi::Rofi::new(&rofi_list)
-                .theme(Some(String::from(
-                    "/home/alpha/.config/rofi/launchers/type-1/style-1.rasi",
-                )))
+                .theme(Some(shellexpand::tilde(config.menu())))
+                .set_sort()
                 .lines(15)
                 .prompt("Projects")
                 .run_index()
             {
                 Ok(choice) => {
-                    println!("Choice: {}", project_list[choice].path().display().to_string());
+                    println!(
+                        "Choice: {}",
+                        project_list[choice].path().display().to_string()
+                    );
                     Command::new("sh")
                         .arg("-c")
-                        .arg(format!("cd {} && neovide .", project_list[choice].path().display().to_string()))
+                        .arg(format!(
+                            "cd {} && neovide .",
+                            project_list[choice].path().display().to_string()
+                        ))
                         .output()
                         .expect("failed to run");
                 }
