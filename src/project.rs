@@ -56,12 +56,12 @@ pub mod selector {
 
         let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-        for (group, dir) in config.directories().iter() {
-            let expanded_dir = shellexpand::tilde(dir);
+        for project in config.projects().iter() {
+            let expanded_dir = shellexpand::tilde(project.directory());
             for file in fs::read_dir(expanded_dir.to_string()).unwrap() {
                 tx.send(Arc::new(Project::new(
                     file.unwrap().path().display().to_string(),
-                    group.to_owned(),
+                    project.name().to_string(),
                 )))
                 .unwrap()
             }

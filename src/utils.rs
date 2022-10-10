@@ -1,22 +1,43 @@
 pub mod config {
     use serde::{Deserialize, Serialize};
-    use std::{collections::HashMap, fs};
+    use std::fs;
+
+    #[derive(Serialize, Deserialize)]
+    pub struct ProjectConfig {
+        name: String,
+        directory: String,
+        icon: String,
+    }
+
+    impl ProjectConfig {
+        pub fn name(&self) -> &str {
+            self.name.as_ref()
+        }
+
+        pub fn directory(&self) -> &str {
+            self.directory.as_ref()
+        }
+
+        pub fn icon(&self) -> &str {
+            self.icon.as_ref()
+        }
+    }
 
     #[derive(Serialize, Deserialize)]
     pub struct Config {
-        directories: HashMap<String, String>,
+        projects: Vec<ProjectConfig>,
         menu: String,
     }
 
     impl Config {
-        pub fn directories(&self) -> &HashMap<String, String> {
-            &self.directories
+        pub fn menu(&self) -> &str {
+            self.menu.as_ref()
         }
 
-    pub fn menu(&self) -> &str {
-        self.menu.as_ref()
+        pub fn projects(&self) -> &[ProjectConfig] {
+            self.projects.as_ref()
+        }
     }
-}
 
     pub fn load(path: &str) -> Config {
         let path = shellexpand::tilde(path).to_string();

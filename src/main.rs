@@ -1,17 +1,17 @@
 extern crate skim;
 
+mod gui;
 mod project;
 mod tmux;
 mod utils;
 
+use crate::gui::rofi;
 use crate::tmux::session::{connect, create_or_connect, session_exists};
 use crate::utils::config::{load, Config};
 use itertools::Itertools;
-use rofi;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
-use std::process::Command;
 
 fn main() {
     let config: Config = load("~/.config/projects.json");
@@ -38,45 +38,7 @@ fn main() {
 
     match std::env::args().nth(1).unwrap().as_str() {
         "gui" => {
-            let mut project_list = Vec::new();
-            for (group, dir) in config.directories().iter() {
-                let expended_dir = shellexpand::tilde(dir);
-                for file in fs::read_dir(expended_dir.to_string()).unwrap() {
-                    project_list.push(project::selector::Project::new(
-                        file.unwrap().path().display().to_string(),
-                        group.to_owned(),
-                    ))
-                }
-            }
-            let rofi_list = project_list
-                .iter()
-                .map(|item| item.session_name().to_string())
-                .collect::<Vec<String>>();
-
-            match rofi::Rofi::new(&rofi_list)
-                .theme(Some(shellexpand::tilde(config.menu())))
-                .set_sort()
-                .lines(15)
-                .prompt("Projects")
-                .run_index()
-            {
-                Ok(choice) => {
-                    println!(
-                        "Choice: {}",
-                        project_list[choice].path().display().to_string()
-                    );
-                    Command::new("sh")
-                        .arg("-c")
-                        .arg(format!(
-                            "cd {} && neovide .",
-                            project_list[choice].path().display().to_string()
-                        ))
-                        .output()
-                        .expect("failed to run");
-                }
-                Err(rofi::Error::Interrupted) => println!("Interrupted"),
-                Err(e) => println!("Error: {}", e),
-            }
+            rofi::run(config);
         }
         "bind" => {
             let key = std::env::args()
