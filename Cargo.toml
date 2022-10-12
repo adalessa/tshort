@@ -1,6 +1,6 @@
 [package]
 name = "tshort"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "Package to quickly switch from sessions on tmux and browse directories for projects"
 homepage = "https://github.com/adalessa/tshort"
