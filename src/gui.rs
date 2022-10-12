@@ -51,7 +51,7 @@ pub mod rofi {
             .collect();
 
         match rofi::Rofi::new(&rofi_list)
-            .theme(Some(shellexpand::tilde(config.menu())))
+            .theme(Some(shellexpand::tilde(config.gui().rofi_menu())))
             .set_sort()
             .lines(15)
             .prompt("Projects")
@@ -65,8 +65,9 @@ pub mod rofi {
                 Command::new("sh")
                     .arg("-c")
                     .arg(format!(
-                        "cd {} && neovide .",
-                        project_list[choice].directory
+                        "cd {} && {}",
+                        project_list[choice].directory,
+                        config.gui().editor(),
                     ))
                     .output()
                     .expect("failed to run");

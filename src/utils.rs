@@ -2,7 +2,7 @@ pub mod config {
     use serde::{Deserialize, Serialize};
     use std::fs;
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Clone)]
     pub struct ProjectConfig {
         name: String,
         directory: String,
@@ -23,19 +23,51 @@ pub mod config {
         }
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct Gui {
+        rofi_menu: String,
+        editor: String,
+    }
+
+    #[derive(Serialize, Deserialize, Clone)]
+    pub struct Cli {
+        editor: String,
+    }
+
+    impl Cli {
+        pub fn editor(&self) -> &str {
+            self.editor.as_ref()
+        }
+    }
+
+    #[derive(Serialize, Deserialize, Clone)]
     pub struct Config {
         projects: Vec<ProjectConfig>,
-        menu: String,
+        gui: Gui,
+        cli: Cli,
     }
 
     impl Config {
-        pub fn menu(&self) -> &str {
-            self.menu.as_ref()
-        }
-
         pub fn projects(&self) -> &[ProjectConfig] {
             self.projects.as_ref()
+        }
+
+        pub fn gui(&self) -> &Gui {
+            &self.gui
+        }
+
+        pub fn cli(&self) -> &Cli {
+            &self.cli
+        }
+    }
+
+    impl Gui {
+        pub fn rofi_menu(&self) -> &str {
+            self.rofi_menu.as_ref()
+        }
+
+        pub fn editor(&self) -> &str {
+            self.editor.as_ref()
         }
     }
 

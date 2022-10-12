@@ -6,7 +6,7 @@ mod tmux;
 mod utils;
 
 use crate::gui::rofi;
-use crate::tmux::session::{connect, create_or_connect, session_exists};
+use crate::tmux::session::Session;
 use crate::utils::config::{load, Config};
 use itertools::Itertools;
 use std::collections::HashMap;
@@ -15,8 +15,10 @@ use std::fs::File;
 
 fn main() {
     let config: Config = load("~/.config/projects.json");
+    let session = Session::new(config.clone());
 
     let projects_dir = shellexpand::tilde("~/.cache/tshort.json").to_string();
+
 
     let mut projects: HashMap<String, project::selector::Project> =
         match fs::read_to_string(projects_dir.to_owned()) {
@@ -24,7 +26,7 @@ fn main() {
             Err(_) => HashMap::new(),
         };
 
-    projects.retain(|_k, v| session_exists(&v.session_name().to_string()));
+    projects.retain(|_k, v| session.session_exists(&v.session_name().to_string()));
 
     if std::env::args().len() == 1 {
         let item = match project::selector::run(config) {
@@ -32,9 +34,10 @@ fn main() {
             Err(_e) => return,
         };
 
-        create_or_connect(item);
+        session.create_or_connect(item);
         return;
     }
+
 
     match std::env::args().nth(1).unwrap().as_str() {
         "gui" => {
@@ -47,14 +50,14 @@ fn main() {
 
             match projects.get(&key) {
                 Some(item) => {
-                    let success = connect(&item.session_name().to_string());
+                    let success = session.connect(&item.session_name().to_string());
                     if !success {
                         let item = match project::selector::run(config) {
                             Ok(item) => item,
                             Err(_e) => return,
                         };
 
-                        let success = create_or_connect(item.to_owned());
+                        let success = session.create_or_connect(item.to_owned());
                         if !success {
                             panic!("Error creating tmux session")
                         }
@@ -68,7 +71,7 @@ fn main() {
                         Err(_e) => return,
                     };
 
-                    let success = create_or_connect(item.to_owned());
+                    let success = session.create_or_connect(item.to_owned());
                     if !success {
                         panic!("Error creating tmux session")
                     }
