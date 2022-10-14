@@ -10,21 +10,35 @@
 Configurar los projectos en tu director `~/.config/projects.json`
 
 con la estructura
-```
+```json
 {
-  "directories": {
-    "Js": "~/code/js",
-    "PHP": "~/code/php",
-    "Rust": "~/code/rust"
+  "projects": [
+    {
+      "name": "php",
+      "directory": "~/code/php",
+      "icon": "system-icon"
+    }
+  ],
+  "cli": {
+    "editor": "nvim"
+  },
+  "gui": {
+    "rofi_menu": "pathtothetheme",
+    "editor": "neovide"
   }
 }
+```
+
+Para correr con el menu de rofi utilizar
+```sh
+tshort gui
 ```
 
 Con esto vas a poder rapidamente buscar en esos directorios tus projectos
 
 Para integrarlo con tmux yo lo utilizo
 
-```
+```sh
 bind-key u run-shell  'tmux popup -E tshort bind 1'
 ```
 
