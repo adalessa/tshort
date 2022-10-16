@@ -1,16 +1,15 @@
 pub mod session {
 
-    use tmux_interface::{NewSession, TmuxCommand};
     use crate::project::selector::Project;
-    use crate::utils::config::Config;
+    use tmux_interface::{NewSession, TmuxCommand};
 
-    pub struct Session {
-        config: Config,
+    pub struct SessionManager {
+        editor: String,
     }
 
-    impl Session {
-        pub fn new (config: Config) -> Self {
-            Self { config }
+    impl SessionManager {
+        pub fn new(editor: String) -> Self {
+            Self { editor }
         }
 
         pub fn session_exists(&self, session_name: &str) -> bool {
@@ -36,7 +35,6 @@ pub mod session {
                 .success()
         }
 
-
         pub fn create(&self, item: Project) -> bool {
             let tmux = TmuxCommand::new();
 
@@ -52,17 +50,13 @@ pub mod session {
                     .session_name(item.session_name())
                     .detached()
                     .start_directory(item.path().to_str().unwrap())
-                    .shell_command(self.config.cli().editor())
+                    .shell_command(self.editor.to_owned())
                     .output()
                     .unwrap()
-                    .success()
-                ;
+                    .success();
             }
 
             return has_session;
         }
     }
-
-
-
 }

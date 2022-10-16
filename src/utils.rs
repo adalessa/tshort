@@ -45,6 +45,7 @@ pub mod config {
         projects: Vec<ProjectConfig>,
         gui: Gui,
         cli: Cli,
+        cache: Option<String>,
     }
 
     impl Config {
@@ -59,6 +60,17 @@ pub mod config {
         pub fn cli(&self) -> &Cli {
             &self.cli
         }
+
+        pub fn cache(&self) -> Option<&String> {
+            self.cache.as_ref()
+        }
+
+        pub fn load(path: &str) -> Self {
+            println!("{}", path);
+            let data = fs::read_to_string(shellexpand::tilde(path).to_string())
+                .expect("Unable to read file");
+            serde_json::from_str(&data).expect("JSON does not have correct format.")
+        }
     }
 
     impl Gui {
@@ -69,11 +81,5 @@ pub mod config {
         pub fn editor(&self) -> &str {
             self.editor.as_ref()
         }
-    }
-
-    pub fn load(path: &str) -> Config {
-        let path = shellexpand::tilde(path).to_string();
-        let data = fs::read_to_string(path).expect("Unable to read file");
-        serde_json::from_str(&data).expect("JSON does not have correct format.")
     }
 }
