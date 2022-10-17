@@ -1,5 +1,5 @@
 pub mod rofi {
-    use std::{fs, process::Command, path::Path, };
+    use std::{fs, path::Path, process::Command};
 
     use crate::utils::config::Config;
 
@@ -11,7 +11,6 @@ pub mod rofi {
     }
 
     impl Option {
-
         fn new(directory: String, icon: String) -> Self {
             Self { directory, icon }
         }
@@ -38,17 +37,17 @@ pub mod rofi {
         for project in config.projects().iter() {
             let expended_dir = shellexpand::tilde(project.directory());
             for file in fs::read_dir(expended_dir.to_string()).unwrap() {
-                project_list.push(Option::new(
-                    file.unwrap().path().display().to_string(),
-                    project.icon().to_owned(),
-                ))
+                let file = file.unwrap();
+                if file.metadata().unwrap().is_dir() {
+                    project_list.push(Option::new(
+                        file.path().display().to_string(),
+                        project.icon().to_owned(),
+                    ))
+                }
             }
         }
 
-        let rofi_list: Vec<String> = project_list
-            .iter()
-            .map(|item| item.label())
-            .collect();
+        let rofi_list: Vec<String> = project_list.iter().map(|item| item.label()).collect();
 
         match rofi::Rofi::new(&rofi_list)
             .theme(Some(shellexpand::tilde(config.gui().rofi_menu())))
@@ -58,10 +57,7 @@ pub mod rofi {
             .run_index()
         {
             Ok(choice) => {
-                println!(
-                    "Choice: {}",
-                    project_list[choice].directory
-                );
+                println!("Choice: {}", project_list[choice].directory);
                 Command::new("sh")
                     .arg("-c")
                     .arg(format!(

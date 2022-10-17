@@ -59,11 +59,14 @@ pub mod selector {
         for project in config.projects().iter() {
             let expanded_dir = shellexpand::tilde(project.directory());
             for file in fs::read_dir(expanded_dir.to_string()).unwrap() {
-                tx.send(Arc::new(Project::new(
-                    file.unwrap().path().display().to_string(),
-                    project.name().to_string(),
-                )))
-                .unwrap()
+                let file = file.unwrap();
+                if file.metadata().unwrap().is_dir() {
+                    tx.send(Arc::new(Project::new(
+                        file.path().display().to_string(),
+                        project.name().to_string(),
+                    )))
+                    .unwrap()
+                }
             }
         }
         drop(tx);
