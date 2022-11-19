@@ -106,7 +106,7 @@ fn main() {
 
             projects.keys().sorted().for_each(|key| {
                 projects_names.push(format!(
-                    "{} [{}]",
+                    "[{} ({})]",
                     projects[key].display_name().to_string(),
                     key
                 ));

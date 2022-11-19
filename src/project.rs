@@ -41,7 +41,7 @@ pub mod selector {
                 .to_str()
                 .unwrap();
 
-            Cow::from(format!("{} {}", &self.icon, str::replace(path, ".", "_")))
+            Cow::from(format!("{}  {}", &self.icon, str::replace(path, ".", "_")))
         }
 
         pub fn path(&self) -> &Path {
