@@ -7,6 +7,7 @@ pub mod config {
         name: String,
         directory: String,
         icon: String,
+        term_icon: String,
     }
 
     impl ProjectConfig {
@@ -21,7 +22,11 @@ pub mod config {
         pub fn icon(&self) -> &str {
             self.icon.as_ref()
         }
-    }
+
+        pub fn term_icon(&self) -> &str {
+            self.term_icon.as_ref()
+        }
+}
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct Gui {
@@ -66,7 +71,6 @@ pub mod config {
         }
 
         pub fn load(path: &str) -> Self {
-            println!("{}", path);
             let data = fs::read_to_string(shellexpand::tilde(path).to_string())
                 .expect("Unable to read file");
             serde_json::from_str(&data).expect("JSON does not have correct format.")

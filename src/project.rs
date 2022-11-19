@@ -14,11 +14,12 @@ pub mod selector {
     pub struct Project {
         path: String,
         group: String,
+        icon: String,
     }
 
     impl Project {
-        pub fn new(path: String, group: String) -> Self {
-            Self { path, group }
+        pub fn new(path: String, group: String, icon: String) -> Self {
+            Self { path, group, icon }
         }
 
         pub fn session_name(&self) -> Cow<str> {
@@ -30,6 +31,17 @@ pub mod selector {
                 .unwrap();
 
             Cow::from(format!("[{}] {}", &self.group, str::replace(path, ".", "_")))
+        }
+
+        pub fn display_name(&self) -> Cow<str> {
+            let path = Path::new(&self.path);
+            let path = path
+                .file_name()
+                .expect("Is not a directory")
+                .to_str()
+                .unwrap();
+
+            Cow::from(format!("{} {}", &self.icon, str::replace(path, ".", "_")))
         }
 
         pub fn path(&self) -> &Path {
@@ -64,6 +76,7 @@ pub mod selector {
                     tx.send(Arc::new(Project::new(
                         file.path().display().to_string(),
                         project.name().to_string(),
+                        project.term_icon().to_string(),
                     )))
                     .unwrap()
                 }
