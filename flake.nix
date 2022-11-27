@@ -17,10 +17,10 @@
         owner = "adalessa";
         repo = pname;
         rev = version;
-        sha256 = "gndbCJNGtL/5Zl/FHNR3tIlbHZpPm+suQKLXCLIgc4A=";
+        sha256 = "MleotBL4T0tATZxe9ykc/PDufOaG2UdhMLspNX9I8d8=";
       };
 
-      cargoSha256 = "mt6AN0qokVzhq6xN8mLmgQ+nwYDA/sibGK1b/VQz+fY=";
+      cargoSha256 = "e3H4v3BPfGOPPf4zpxUUgMCymdnQ6Kx6/vVR8GXz8bQ=";
 
       meta = with pkgs.lib; {
         description = "A cli tool to manage tmux session";
