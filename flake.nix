@@ -20,7 +20,7 @@
         sha256 = "gndbCJNGtL/5Zl/FHNR3tIlbHZpPm+suQKLXCLIgc4A=";
       };
 
-      cargoSha256 = "0lqruGAIYh70O+ecQM8ubcnuzRFDi0+1ywXST3l+uVg=";
+      cargoSha256 = "mt6AN0qokVzhq6xN8mLmgQ+nwYDA/sibGK1b/VQz+fY=";
 
       meta = with pkgs.lib; {
         description = "A cli tool to manage tmux session";
