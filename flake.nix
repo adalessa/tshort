@@ -11,7 +11,7 @@
   {
     packages.${system}.default = pkgs.rustPlatform.buildRustPackage rec {
       pname = "tshort";
-      version = "v0.1.3";
+      version = "v0.1.4";
 
       src = pkgs.fetchFromGitHub {
         owner = "adalessa";
