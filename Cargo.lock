@@ -778,15 +778,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 
 [[package]]
-name = "rofi"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4bc8f88160318ab75508e32d837e72ecfac4270d27cdf44315495d614636df6"
-dependencies = [
- "thiserror",
-]
-
-[[package]]
 name = "rustc_version"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1139,7 +1130,6 @@ version = "0.1.4"
 dependencies = [
  "clap 4.0.15",
  "itertools",
- "rofi",
  "serde",
  "serde_json",
  "shellexpand",

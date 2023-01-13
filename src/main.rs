@@ -1,11 +1,9 @@
 extern crate skim;
 
-mod gui;
 mod project;
 mod tmux;
 mod utils;
 
-use crate::gui::rofi;
 use crate::tmux::session::SessionManager;
 use crate::utils::config::Config;
 use clap::{Parser, Subcommand};
@@ -19,7 +17,7 @@ use std::fs::File;
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long, value_name = "FILE", default_value_t = String::from("~/.config/projects.json"))]
-    config: String,
+    config_file: String,
 
     #[command(subcommand)]
     command: Option<Commands>,
@@ -27,7 +25,6 @@ struct Args {
 
 #[derive(Subcommand)]
 enum Commands {
-    Gui,
     Bind { key: Option<String> },
     Forget { key: Option<String> },
     List,
@@ -36,23 +33,14 @@ enum Commands {
 fn main() {
     let args = Args::parse();
 
-    let config: Config = Config::load(&args.config);
-    let editor = config.cli().editor().to_string();
-    let session = SessionManager::new(editor);
+    let config: Config = Config::load(&args.config_file);
+    let session = SessionManager::new();
 
-    let cache_path = match config.cache() {
-        Some(path) => path,
-        None => "~/.cache/tshort.json",
-    };
-
-    let projects_dir = shellexpand::tilde(cache_path).to_string();
+    let projects_dir = shellexpand::tilde("~/.cache/tshort.json").to_string();
 
     let mut projects = get_projects(&projects_dir, &session);
 
     match &args.command {
-        Some(Commands::Gui) => {
-            rofi::run(config);
-        },
         Some(Commands::Bind { key }) => {
             let key = match key {
                 Some(key) => key.as_str(),

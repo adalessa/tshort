@@ -68,7 +68,7 @@ pub mod selector {
 
         let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-        for project in config.projects().iter() {
+        for project in config.projects.iter() {
             let expanded_dir = shellexpand::tilde(project.directory());
             for file in fs::read_dir(expanded_dir.to_string()).unwrap() {
                 let file = file.unwrap();
@@ -76,7 +76,7 @@ pub mod selector {
                     tx.send(Arc::new(Project::new(
                         file.path().display().to_string(),
                         project.name().to_string(),
-                        project.term_icon().to_string(),
+                        project.icon().unwrap_or(&"".to_string()).to_string(),
                     )))
                     .unwrap()
                 }

@@ -1,13 +1,12 @@
 pub mod config {
     use serde::{Deserialize, Serialize};
-    use std::fs;
+    use std::{fs, io::Error};
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct ProjectConfig {
         name: String,
         directory: String,
-        icon: String,
-        term_icon: String,
+        icon: Option<String>,
     }
 
     impl ProjectConfig {
@@ -19,71 +18,35 @@ pub mod config {
             self.directory.as_ref()
         }
 
-        pub fn icon(&self) -> &str {
+        pub fn icon(&self) -> Option<&String> {
             self.icon.as_ref()
-        }
-
-        pub fn term_icon(&self) -> &str {
-            self.term_icon.as_ref()
-        }
-}
-
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct Gui {
-        rofi_menu: String,
-        editor: String,
-    }
-
-    #[derive(Serialize, Deserialize, Clone)]
-    pub struct Cli {
-        editor: String,
-    }
-
-    impl Cli {
-        pub fn editor(&self) -> &str {
-            self.editor.as_ref()
         }
     }
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct Config {
-        projects: Vec<ProjectConfig>,
-        gui: Gui,
-        cli: Cli,
-        cache: Option<String>,
+        pub projects: Vec<ProjectConfig>,
     }
 
     impl Config {
-        pub fn projects(&self) -> &[ProjectConfig] {
-            self.projects.as_ref()
-        }
-
-        pub fn gui(&self) -> &Gui {
-            &self.gui
-        }
-
-        pub fn cli(&self) -> &Cli {
-            &self.cli
-        }
-
-        pub fn cache(&self) -> Option<&String> {
-            self.cache.as_ref()
-        }
-
         pub fn load(path: &str) -> Self {
-            let data = fs::read_to_string(shellexpand::tilde(path).to_string())
-                .expect("Unable to read file");
+            let data = read_or_create_file(shellexpand::tilde(path).to_string().as_str(), "{\"projects\": []}").expect("Cant read nor create the file");
             serde_json::from_str(&data).expect("JSON does not have correct format.")
         }
     }
 
-    impl Gui {
-        pub fn rofi_menu(&self) -> &str {
-            self.rofi_menu.as_ref()
-        }
+    fn read_or_create_file(file_path: &str, initial_contents: &str) -> Result<String, Error> {
+        match fs::read_to_string(file_path) {
+            Ok(contents) => Ok(contents),
+            Err(err) => {
+                if err.kind() == std::io::ErrorKind::NotFound {
+                    fs::write(file_path, initial_contents)?;
 
-        pub fn editor(&self) -> &str {
-            self.editor.as_ref()
+                    fs::read_to_string(file_path)
+                } else {
+                    Err(err)
+                }
+            }
         }
     }
 }

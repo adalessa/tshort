@@ -4,12 +4,11 @@ pub mod session {
     use tmux_interface::{NewSession, TmuxCommand};
 
     pub struct SessionManager {
-        editor: String,
     }
 
     impl SessionManager {
-        pub fn new(editor: String) -> Self {
-            Self { editor }
+        pub fn new() -> Self {
+            Self { }
         }
 
         pub fn session_exists(&self, session_name: &str) -> bool {
@@ -50,7 +49,7 @@ pub mod session {
                     .session_name(item.session_name())
                     .detached()
                     .start_directory(item.path().to_str().unwrap())
-                    .shell_command(self.editor.to_owned())
+                    .shell_command("$EDITOR")
                     .output()
                     .unwrap()
                     .success();
