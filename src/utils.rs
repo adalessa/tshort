@@ -4,22 +4,15 @@ pub mod config {
 
     #[derive(Serialize, Deserialize, Clone)]
     pub struct ProjectConfig {
-        name: String,
-        directory: String,
-        icon: Option<String>,
+        pub name: String,
+        pub directory: String,
+        pub icon: Option<String>,
+        pub color: Option<String>,
     }
 
     impl ProjectConfig {
-        pub fn name(&self) -> &str {
-            self.name.as_ref()
-        }
-
         pub fn directory(&self) -> &str {
             self.directory.as_ref()
-        }
-
-        pub fn icon(&self) -> Option<&String> {
-            self.icon.as_ref()
         }
     }
 
