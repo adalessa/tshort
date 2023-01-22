@@ -1,62 +1,42 @@
 pub mod session {
-
-    use crate::project::selector::Project;
+    use crate::project::Project;
     use tmux_interface::{NewSession, TmuxCommand};
 
-    pub struct SessionManager {
-        editor: String,
+    pub fn exists(session_name: &str) -> bool {
+        TmuxCommand::new()
+            .has_session()
+            .target_session(session_name)
+            .output()
+            .unwrap()
+            .success()
     }
 
-    impl SessionManager {
-        pub fn new(editor: String) -> Self {
-            Self { editor }
-        }
+    pub fn connect(session_name: &str) -> bool {
+        TmuxCommand::new()
+            .switch_client()
+            .target_session(session_name)
+            .output()
+            .unwrap()
+            .success()
+    }
 
-        pub fn session_exists(&self, session_name: &str) -> bool {
-            TmuxCommand::new()
-                .has_session()
-                .target_session(session_name)
-                .output()
-                .unwrap()
-                .success()
-        }
-
-        pub fn create_or_connect(&self, item: Project) -> bool {
-            self.create(item.to_owned());
-            self.connect(&item.session_name())
-        }
-
-        pub fn connect(&self, session_name: &str) -> bool {
-            TmuxCommand::new()
-                .switch_client()
-                .target_session(session_name)
-                .output()
-                .unwrap()
-                .success()
-        }
-
-        pub fn create(&self, item: Project) -> bool {
-            let tmux = TmuxCommand::new();
-
-            let has_session = tmux
-                .has_session()
-                .target_session(item.session_name())
+    pub fn create(item: Project) -> bool {
+        if !exists(&item.session_name()) {
+            return NewSession::new()
+                .session_name(item.tmux_display())
+                .detached()
+                .start_directory(item.path().to_str().unwrap())
+                .shell_command(std::env::var("EDITOR").unwrap_or("nvim".to_string()))
                 .output()
                 .unwrap()
                 .success();
-
-            if !has_session {
-                return NewSession::new()
-                    .session_name(item.session_name())
-                    .detached()
-                    .start_directory(item.path().to_str().unwrap())
-                    .shell_command(self.editor.to_owned())
-                    .output()
-                    .unwrap()
-                    .success();
-            }
-
-            return has_session;
         }
+
+        return true;
+    }
+
+    pub fn connect_or_create(item: Project) -> bool {
+        create(item.to_owned());
+        connect(&item.tmux_display())
     }
 }

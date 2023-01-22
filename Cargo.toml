@@ -1,6 +1,6 @@
 [package]
 name = "tshort"
-version = "0.1.4"
+version = "0.2.0"
 edition = "2021"
 description = "Package to quickly switch from sessions on tmux and browse directories for projects"
 homepage = "https://github.com/adalessa/tshort"
@@ -14,11 +14,11 @@ exclude = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rofi = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 shellexpand = "2.1"
 tmux_interface = { version = "^0.1.0", features = ["tmux_2_6"], default-features = false }
-skim = "0.9.4"
+skim = "0.10.2"
+raster = "0.2.0"
 itertools = "0.10.3"
 clap = { version = "4.0.15", features = ["derive"] }

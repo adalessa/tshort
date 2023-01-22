@@ -1,112 +1,107 @@
-pub mod selector {
-    use skim::prelude::*;
-    use std::{
-        borrow::Cow,
-        fs,
-        io::{self, Error, ErrorKind},
-        path::Path,
-    };
+use std::{borrow::Cow, path::Path};
 
-    use crate::utils::config::Config;
-    use serde::{Deserialize, Serialize};
+use raster::Color;
+use serde::{Deserialize, Serialize};
+use skim::{AnsiString, DisplayContext, SkimItem};
 
-    #[derive(Clone, Serialize, Deserialize)]
-    pub struct Project {
-        path: String,
-        group: String,
-        icon: String,
-    }
+use crate::utils::config::ProjectConfig;
 
-    impl Project {
-        pub fn new(path: String, group: String, icon: String) -> Self {
-            Self { path, group, icon }
-        }
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Project {
+    path: String,
+    group: String,
+    icon: String,
+    color: Option<String>,
+}
 
-        pub fn session_name(&self) -> Cow<str> {
-            let path = Path::new(&self.path);
-            let path = path
-                .file_name()
-                .expect("Is not a directory")
-                .to_str()
-                .unwrap();
-
-            Cow::from(format!("[{}] {}", &self.group, str::replace(path, ".", "_")))
-        }
-
-        pub fn display_name(&self) -> Cow<str> {
-            let path = Path::new(&self.path);
-            let path = path
-                .file_name()
-                .expect("Is not a directory")
-                .to_str()
-                .unwrap();
-
-            Cow::from(format!("{}  {}", &self.icon, str::replace(path, ".", "_")))
-        }
-
-        pub fn path(&self) -> &Path {
-            Path::new(&self.path)
+impl Project {
+    pub fn new(path: String, config: &ProjectConfig) -> Self {
+        Self {
+            path,
+            group: config.name.clone(),
+            icon: config.icon.clone().unwrap_or("".to_string()),
+            color: config.color.clone(),
         }
     }
 
-    impl SkimItem for Project {
-        fn text(&self) -> Cow<str> {
-            self.session_name()
-        }
-
-        fn preview(&self, _context: PreviewContext) -> ItemPreview {
-            ItemPreview::Text(self.path.to_owned())
-        }
-    }
-
-    pub fn run(config: Config) -> Result<Project, io::Error> {
-        let options = SkimOptionsBuilder::default()
-            .height(Some("100%"))
-            .multi(false)
-            .build()
+    pub fn session_name(&self) -> Cow<str> {
+        let path = Path::new(&self.path);
+        let path = path
+            .file_name()
+            .expect("Is not a directory")
+            .to_str()
             .unwrap();
 
-        let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
+        Cow::from(format!(
+            "[{}] {}",
+            &self.group,
+            str::replace(path, ".", "_")
+        ))
+    }
 
-        for project in config.projects().iter() {
-            let expanded_dir = shellexpand::tilde(project.directory());
-            for file in fs::read_dir(expanded_dir.to_string()).unwrap() {
-                let file = file.unwrap();
-                if file.metadata().unwrap().is_dir() {
-                    tx.send(Arc::new(Project::new(
-                        file.path().display().to_string(),
-                        project.name().to_string(),
-                        project.term_icon().to_string(),
-                    )))
-                    .unwrap()
-                }
+    pub fn tmux_display(&self) -> Cow<str> {
+        match &self.color {
+            Some(color) => Cow::from(format!(
+                "#[fg={}]{}#[fg=default] {}",
+                color,
+                &self.icon,
+                str::replace(self.get_path(), ".", "_")
+            )),
+            None => Cow::from(format!(
+                "{}  {}",
+                &self.icon,
+                str::replace(self.get_path(), ".", "_")
+            )),
+        }
+    }
+
+    pub fn skim_display(&self) -> Cow<str> {
+        match &self.color {
+            Some(color) => {
+                let color = Color::hex(color).unwrap();
+                Cow::from(format!(
+                    "\x1b[38;2;{};{};{}m{}\x1b[m {}",
+                    &color.r.to_string(),
+                    &color.g.to_string(),
+                    &color.b.to_string(),
+                    &self.icon,
+                    str::replace(self.get_path(), ".", "_")
+                ))
             }
+            None => Cow::from(format!(
+                "{}  {}",
+                &self.icon,
+                str::replace(self.get_path(), ".", "_")
+            )),
         }
-        drop(tx);
+    }
 
-        let selected_items = Skim::run_with(&options, Some(rx))
-            .map(|out| match out.final_key {
-                Key::ESC => Vec::new(),
-                Key::Enter => out.selected_items,
-                _ => Vec::new(),
-            })
-            .unwrap_or_else(|| Vec::new())
-            .iter()
-            .map(|selected_item| {
-                (**selected_item)
-                    .as_any()
-                    .downcast_ref::<Project>()
-                    .unwrap()
-                    .to_owned()
-            })
-            .collect::<Vec<Project>>();
+    pub fn skim_text(&self) -> Cow<str> {
+        Cow::from(format!("{}", self.session_name()))
+    }
 
-        let selected = selected_items.iter().next();
-        if !selected.is_some() {
-            let error = Error::new(ErrorKind::Other, "Nothing selected");
-            return Err(error);
-        }
+    pub fn path(&self) -> &Path {
+        Path::new(&self.path)
+    }
 
-        Ok(selected.unwrap().clone())
+    fn get_path(&self) -> &str {
+        let path = Path::new(&self.path);
+        let path = path
+            .file_name()
+            .expect("Is not a directory")
+            .to_str()
+            .unwrap();
+        return path;
+    }
+}
+
+impl SkimItem for Project {
+    fn text(&self) -> Cow<str> {
+        Cow::from(self.skim_text())
+    }
+
+    fn display<'a>(&'a self, _context: DisplayContext<'a>) -> AnsiString<'a> {
+        // AnsiString::new_string("\x1b[31mhello:\x1b[m\n".to_string(), vec!())
+        AnsiString::parse(&self.skim_display())
     }
 }

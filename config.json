@@ -1,8 +1,10 @@
 {
-  "directories": {
-    "GO-adalessa": "~/code/go/src/github.com/adalessa",
-    "Js": "~/code/js",
-    "PHP": "~/code/php",
-    "Rust": "~/code/rust"
-  }
+  "projects": [
+    {
+      "name": "php",
+      "directory": "~/code/laravel",
+      "icon": "",
+      "color": "#ff2d20"
+    }
+  ]
 }

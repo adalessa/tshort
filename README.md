@@ -16,34 +16,12 @@ con la estructura
     {
       "name": "php",
       "directory": "~/code/php",
-      "icon": "system-icon"
+      "icon": " ",
+      "color": "#0000ff"
     }
-  ],
-  "cli": {
-    "editor": "nvim"
-  },
-  "gui": {
-    "rofi_menu": "pathtothetheme",
-    "editor": "neovide"
-  }
+  ]
 }
 ```
-
-Para correr con el menu de rofi utilizar
-```sh
-tshort gui
-```
-
-Para temes de rofi un buen repositorio es https://github.com/adi1090x/rofi es cuale estoy usando para launcher y para gui
-
-Otro tema visual son los iconos. Podes usar iconos ya registrados o hacer como yo y registrar los propios
-```
-xdg-icon-resource install --size 128 alpha-rust.png
-```
-asegurate del tamanio sea cuadrado preferentemente de 128.
-
-Importante agregar el prefijo y este mismo utilizarlo en la configuracion
-
 
 Con esto vas a poder rapidamente buscar en esos directorios tus projectos
 
