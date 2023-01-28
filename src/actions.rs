@@ -10,7 +10,7 @@ pub fn bind(key: &Option<String>, config: Config) {
     };
     match projects.get(key.as_str()) {
         Some(item) => {
-            let success = session::connect(&item.tmux_display().to_string());
+            let success = session::connect(&item.tmux_display());
             if !success {
                 let item = match selector::run(config) {
                     Ok(item) => item,
@@ -60,7 +60,7 @@ pub fn list() {
     projects.keys().sorted().for_each(|key| {
         projects_names.push(format!(
             "{} <{}>",
-            projects[key].tmux_display().to_string(),
+            projects[key].tmux_display(),
             key
         ));
     });

@@ -9,7 +9,7 @@ pub fn get() -> HashMap<String, Project> {
         Ok(data) => serde_json::from_str(&data).expect("JSON does not have correct format."),
         Err(_) => HashMap::new(),
     };
-    projects.retain(|_k, v| session::exists(&v.tmux_display().to_string()));
+    projects.retain(|_k, v| session::exists(&v.tmux_display()));
     projects
 }
 

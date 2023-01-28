@@ -19,7 +19,7 @@ impl Project {
         Self {
             path,
             group: config.name.clone(),
-            icon: config.icon.clone().unwrap_or("".to_string()),
+            icon: config.icon.clone().unwrap_or_else(|| String::from("")),
             color: config.color.clone(),
         }
     }
@@ -86,22 +86,66 @@ impl Project {
 
     fn get_path(&self) -> &str {
         let path = Path::new(&self.path);
-        let path = path
+        path
             .file_name()
             .expect("Is not a directory")
             .to_str()
-            .unwrap();
-        return path;
+            .unwrap()
     }
 }
 
 impl SkimItem for Project {
     fn text(&self) -> Cow<str> {
-        Cow::from(self.skim_text())
+        self.skim_text()
     }
 
     fn display<'a>(&'a self, _context: DisplayContext<'a>) -> AnsiString<'a> {
-        // AnsiString::new_string("\x1b[31mhello:\x1b[m\n".to_string(), vec!())
         AnsiString::parse(&self.skim_display())
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use std::borrow::Cow;
+
+    use crate::{project::Project, utils::config::ProjectConfig};
+
+    #[test]
+    fn test_can_generate_the_names() {
+        let config: ProjectConfig = ProjectConfig {
+            name: "PHP".to_string(),
+            directory: "/home/user/code/php".to_string(),
+            icon: Some("".to_string()),
+            color: None,
+        };
+        let project: Project = Project::new(
+            "/home/user/code/php/my-project".to_string(),
+            &config,
+        );
+
+        assert_eq!(Cow::from("[PHP] my-project"), project.session_name());
+        assert_eq!(Cow::from("  my-project"), project.tmux_display());
+        assert_eq!(Cow::from("  my-project"), project.skim_display());
+        assert_eq!(Cow::from("[PHP] my-project"), project.skim_text());
+    }
+
+    #[test]
+    fn test_can_generate_the_names_with_color() {
+        let config: ProjectConfig = ProjectConfig {
+            name: "PHP".to_string(),
+            directory: "/home/user/code/php".to_string(),
+            icon: Some(" ".to_string()),
+            color: Some("#ff0000".to_string()),
+        };
+        let project: Project = Project::new(
+            "/home/user/code/php/my-project".to_string(),
+            &config,
+        );
+
+        assert_eq!(Cow::from("[PHP] my-project"), project.session_name());
+        assert_eq!(Cow::from("#[fg=#ff0000] #[fg=default] my-project"), project.tmux_display());
+        assert_eq!(Cow::from("\x1b[38;2;255;0;0m \x1b[m my-project"), project.skim_display());
+        assert_eq!(Cow::from("[PHP] my-project"), project.skim_text());
     }
 }

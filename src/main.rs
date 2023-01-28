@@ -3,7 +3,6 @@ extern crate skim;
 mod actions;
 mod application;
 mod project;
-mod project_test;
 mod projects;
 mod selector;
 mod tmux;
@@ -16,7 +15,7 @@ use crate::application::{Args, Commands};
 
 fn main() {
     let args = Args::parse();
-    let config = Config::load(&args.config_file());
+    let config = Config::load(args.config_file());
 
     match &args.command() {
         Some(Commands::Bind { key }) => actions::bind(key, config),

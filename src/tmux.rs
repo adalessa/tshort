@@ -26,13 +26,16 @@ pub mod session {
                 .session_name(item.tmux_display())
                 .detached()
                 .start_directory(item.path().to_str().unwrap())
-                .shell_command(std::env::var("EDITOR").unwrap_or("nvim".to_string()))
+                .shell_command(match std::env::var("EDITOR") {
+                    Ok(val) => val,
+                    Err(_) => String::from("nvim")
+                })
                 .output()
                 .unwrap()
                 .success();
         }
 
-        return true;
+        true
     }
 
     pub fn connect_or_create(item: Project) -> bool {

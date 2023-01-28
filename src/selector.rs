@@ -36,7 +36,7 @@ pub fn run(config: Config) -> Result<Project, io::Error> {
             Key::Enter => out.selected_items,
             _ => Vec::new(),
         })
-        .unwrap_or_else(|| Vec::new())
+        .unwrap_or_else(Vec::new)
         .iter()
         .map(|selected_item| {
             (**selected_item)
@@ -47,8 +47,8 @@ pub fn run(config: Config) -> Result<Project, io::Error> {
         })
         .collect::<Vec<Project>>();
 
-    let selected = selected_items.iter().next();
-    if !selected.is_some() {
+    let selected = selected_items.first();
+    if selected.is_none() {
         let error = Error::new(ErrorKind::Other, "Nothing selected");
         return Err(error);
     }
