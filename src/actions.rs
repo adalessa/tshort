@@ -8,7 +8,7 @@ pub fn bind(key: &Option<String>, config: Config) {
         Some(key) => key,
         None => panic!("No key provided"),
     };
-    match projects.get(key.as_str()) {
+    match projects.get(key) {
         Some(item) => {
             let success = session::connect(&item.tmux_display());
             if !success {
@@ -25,7 +25,7 @@ pub fn bind(key: &Option<String>, config: Config) {
                 projects.insert(key.to_string(), item);
             }
         }
-        _ => {
+        None => {
             let item = match selector::run(config) {
                 Ok(item) => item,
                 Err(_e) => return,
@@ -36,7 +36,7 @@ pub fn bind(key: &Option<String>, config: Config) {
                 panic!("Error creating tmux session")
             }
 
-            projects.insert(key.to_string(), item);
+            projects.insert(key.clone(), item);
         }
     };
 
@@ -44,13 +44,10 @@ pub fn bind(key: &Option<String>, config: Config) {
 }
 
 pub fn forget(key: &Option<String>) {
-    let key = match key {
-        Some(key) => key,
+    match key {
+        Some(key) => projects::remove_item(key),
         None => panic!("No key provided"),
     };
-    let mut projects = projects::get();
-    projects.remove(key.as_str());
-    projects::save(projects)
 }
 
 pub fn list() {
@@ -58,11 +55,7 @@ pub fn list() {
     let mut projects_names: Vec<String> = Vec::<String>::new();
 
     projects.keys().sorted().for_each(|key| {
-        projects_names.push(format!(
-            "{} <{}>",
-            projects[key].tmux_display(),
-            key
-        ));
+        projects_names.push(format!("{} <{}>", projects[key].tmux_display(), key));
     });
 
     println!("{}", projects_names.join(" "));

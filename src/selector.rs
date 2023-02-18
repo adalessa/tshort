@@ -4,7 +4,7 @@ use std::{
     io::{self, Error, ErrorKind},
 };
 
-use crate::{utils::config::Config, project::Project};
+use crate::{project::Project, utils::config::Config};
 
 pub fn run(config: Config) -> Result<Project, io::Error> {
     let options = SkimOptionsBuilder::default()
@@ -15,18 +15,32 @@ pub fn run(config: Config) -> Result<Project, io::Error> {
 
     let (tx, rx): (SkimItemSender, SkimItemReceiver) = unbounded();
 
-    for project in config.projects.iter() {
-        let expanded_dir = shellexpand::tilde(project.directory());
+    for project in config.directories.iter() {
+        let expanded_dir = shellexpand::tilde(&project.directory);
         for file in fs::read_dir(expanded_dir.to_string()).unwrap() {
             let file = file.unwrap();
             if file.metadata().unwrap().is_dir() {
-                tx.send(Arc::new(Project::new(
-                    file.path().display().to_string(),
-                    project,
-                )))
+                tx.send(Arc::new(Project {
+                    path: file.path().display().to_string(),
+                    name: file.file_name().into_string().unwrap(),
+                    group: Some(project.name.clone()),
+                    icon: project.icon.clone(),
+                    color: project.color.clone(),
+                }))
                 .unwrap()
             }
         }
+    }
+    for project in config.projects.iter() {
+        let dir = shellexpand::tilde(&project.directory);
+        tx.send(Arc::new(Project {
+            path: dir.into_owned(),
+            name: project.name.clone(),
+            group: None,
+            icon: project.icon.clone(),
+            color: project.color.clone(),
+        }))
+        .unwrap();
     }
     drop(tx);
 

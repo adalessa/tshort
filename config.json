@@ -1,10 +1,18 @@
 {
-  "projects": [
+  "directories": [
     {
       "name": "php",
       "directory": "~/code/laravel",
       "icon": "",
       "color": "#ff2d20"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Neovim Config",
+      "directory": "~/.config/nvim",
+      "icon": "",
+      "color": "#629e3d"
     }
   ]
 }

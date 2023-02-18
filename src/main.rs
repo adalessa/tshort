@@ -15,13 +15,15 @@ use crate::application::{Args, Commands};
 
 fn main() {
     let args = Args::parse();
-    let config = Config::load(args.config_file());
+    let config = Config::load(&args.config_file);
 
-    match &args.command() {
-        Some(Commands::Bind { key }) => actions::bind(key, config),
-        Some(Commands::Forget { key }) => actions::forget(key),
-        Some(Commands::List) => actions::list(),
-        Some(Commands::RemoveCache) => actions::remove_cache(),
+    match &args.command {
+        Some(c) => match c {
+            Commands::Bind { key } => actions::bind(key, config),
+            Commands::Forget { key } => actions::forget(key),
+            Commands::List => actions::list(),
+            Commands::RemoveCache => actions::remove_cache(),
+        },
         None => actions::default(config),
     }
 }

@@ -4,26 +4,16 @@ use raster::Color;
 use serde::{Deserialize, Serialize};
 use skim::{AnsiString, DisplayContext, SkimItem};
 
-use crate::utils::config::ProjectConfig;
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Project {
-    path: String,
-    group: String,
-    icon: String,
-    color: Option<String>,
+    pub path: String,
+    pub name: String,
+    pub group: Option<String>,
+    pub icon: Option<String>,
+    pub color: Option<String>,
 }
 
 impl Project {
-    pub fn new(path: String, config: &ProjectConfig) -> Self {
-        Self {
-            path,
-            group: config.name.clone(),
-            icon: config.icon.clone().unwrap_or_else(|| String::from("")),
-            color: config.color.clone(),
-        }
-    }
-
     pub fn session_name(&self) -> Cow<str> {
         let path = Path::new(&self.path);
         let path = path
@@ -34,7 +24,7 @@ impl Project {
 
         Cow::from(format!(
             "[{}] {}",
-            &self.group,
+            self.group.as_ref().unwrap_or(&"".to_string()),
             str::replace(path, ".", "_")
         ))
     }
@@ -44,12 +34,12 @@ impl Project {
             Some(color) => Cow::from(format!(
                 "#[fg={}]{}#[fg=default] {}",
                 color,
-                &self.icon,
+                self.icon.as_ref().unwrap(),
                 str::replace(self.get_path(), ".", "_")
             )),
             None => Cow::from(format!(
                 "{}  {}",
-                &self.icon,
+                self.icon.as_ref().unwrap(),
                 str::replace(self.get_path(), ".", "_")
             )),
         }
@@ -64,13 +54,13 @@ impl Project {
                     &color.r.to_string(),
                     &color.g.to_string(),
                     &color.b.to_string(),
-                    &self.icon,
+                    self.icon.as_ref().unwrap_or(&"".to_string()),
                     str::replace(self.get_path(), ".", "_")
                 ))
             }
             None => Cow::from(format!(
                 "{}  {}",
-                &self.icon,
+                self.icon.as_ref().unwrap_or(&"".to_string()),
                 str::replace(self.get_path(), ".", "_")
             )),
         }
@@ -86,8 +76,7 @@ impl Project {
 
     fn get_path(&self) -> &str {
         let path = Path::new(&self.path);
-        path
-            .file_name()
+        path.file_name()
             .expect("Is not a directory")
             .to_str()
             .unwrap()
@@ -104,25 +93,21 @@ impl SkimItem for Project {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use std::borrow::Cow;
 
-    use crate::{project::Project, utils::config::ProjectConfig};
+    use crate::project::Project;
 
     #[test]
     fn test_can_generate_the_names() {
-        let config: ProjectConfig = ProjectConfig {
-            name: "PHP".to_string(),
-            directory: "/home/user/code/php".to_string(),
+        let project = Project {
+            path: "/home/user/code/php/my-project".to_string(),
+            name: "my-project".to_string(),
+            group: Some("PHP".to_string()),
             icon: Some("".to_string()),
             color: None,
         };
-        let project: Project = Project::new(
-            "/home/user/code/php/my-project".to_string(),
-            &config,
-        );
 
         assert_eq!(Cow::from("[PHP] my-project"), project.session_name());
         assert_eq!(Cow::from("  my-project"), project.tmux_display());
@@ -132,20 +117,23 @@ mod test {
 
     #[test]
     fn test_can_generate_the_names_with_color() {
-        let config: ProjectConfig = ProjectConfig {
-            name: "PHP".to_string(),
-            directory: "/home/user/code/php".to_string(),
+        let project = Project {
+            path: "/home/user/code/php/my-project".to_string(),
+            name: "my-project".to_string(),
+            group: Some("PHP".to_string()),
             icon: Some(" ".to_string()),
             color: Some("#ff0000".to_string()),
         };
-        let project: Project = Project::new(
-            "/home/user/code/php/my-project".to_string(),
-            &config,
-        );
 
         assert_eq!(Cow::from("[PHP] my-project"), project.session_name());
-        assert_eq!(Cow::from("#[fg=#ff0000] #[fg=default] my-project"), project.tmux_display());
-        assert_eq!(Cow::from("\x1b[38;2;255;0;0m \x1b[m my-project"), project.skim_display());
+        assert_eq!(
+            Cow::from("#[fg=#ff0000] #[fg=default] my-project"),
+            project.tmux_display()
+        );
+        assert_eq!(
+            Cow::from("\x1b[38;2;255;0;0m \x1b[m my-project"),
+            project.skim_display()
+        );
         assert_eq!(Cow::from("[PHP] my-project"), project.skim_text());
     }
 }

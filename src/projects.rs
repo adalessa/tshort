@@ -1,4 +1,7 @@
-use std::{collections::HashMap, fs::{self, File}};
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+};
 
 use crate::{project::Project, tmux::session};
 
@@ -17,9 +20,14 @@ pub fn save(projects: HashMap<String, Project>) {
     serde_json::to_writer(&File::create(get_cache_file_path()).unwrap(), &projects).unwrap();
 }
 
-pub fn remove() -> std::io::Result<()>{
-    fs::remove_file(get_cache_file_path())?;
-    Ok(())
+pub fn remove_item(key: &str) {
+    let mut projects = get();
+    projects.remove(key);
+    save(projects)
+}
+
+pub fn remove() -> std::io::Result<()> {
+    fs::remove_file(get_cache_file_path())
 }
 
 fn get_cache_file_path() -> String {
