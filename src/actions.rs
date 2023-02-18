@@ -55,7 +55,7 @@ pub fn list() {
     let mut projects_names: Vec<String> = Vec::<String>::new();
 
     projects.keys().sorted().for_each(|key| {
-        projects_names.push(format!("{} <{}>", projects[key].tmux_display(), key));
+        projects_names.push(format!("{} #[fg=#212E3E]#{}#[fg=default]", projects[key].tmux_display(), key));
     });
 
     println!("{}", projects_names.join(" "));
