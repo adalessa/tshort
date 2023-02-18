@@ -15,17 +15,10 @@ pub struct Project {
 
 impl Project {
     pub fn session_name(&self) -> Cow<str> {
-        let path = Path::new(&self.path);
-        let path = path
-            .file_name()
-            .expect("Is not a directory")
-            .to_str()
-            .unwrap();
-
         Cow::from(format!(
             "[{}] {}",
             self.group.as_ref().unwrap_or(&"".to_string()),
-            str::replace(path, ".", "_")
+            str::replace(&self.name, ".", "_")
         ))
     }
 
@@ -35,12 +28,12 @@ impl Project {
                 "#[fg={}]{}#[fg=default] {}",
                 color,
                 self.icon.as_ref().unwrap(),
-                str::replace(self.get_path(), ".", "_")
+                str::replace(&self.name, ".", "_")
             )),
             None => Cow::from(format!(
                 "{}  {}",
                 self.icon.as_ref().unwrap(),
-                str::replace(self.get_path(), ".", "_")
+                str::replace(&self.name, ".", "_")
             )),
         }
     }
@@ -55,13 +48,13 @@ impl Project {
                     &color.g.to_string(),
                     &color.b.to_string(),
                     self.icon.as_ref().unwrap_or(&"".to_string()),
-                    str::replace(self.get_path(), ".", "_")
+                    str::replace(&self.name, ".", "_")
                 ))
             }
             None => Cow::from(format!(
                 "{}  {}",
                 self.icon.as_ref().unwrap_or(&"".to_string()),
-                str::replace(self.get_path(), ".", "_")
+                str::replace(&self.name, ".", "_")
             )),
         }
     }
@@ -72,14 +65,6 @@ impl Project {
 
     pub fn path(&self) -> &Path {
         Path::new(&self.path)
-    }
-
-    fn get_path(&self) -> &str {
-        let path = Path::new(&self.path);
-        path.file_name()
-            .expect("Is not a directory")
-            .to_str()
-            .unwrap()
     }
 }
 
@@ -118,7 +103,7 @@ mod test {
     #[test]
     fn test_can_generate_the_names_with_color() {
         let project = Project {
-            path: "/home/user/code/php/my-project".to_string(),
+            path: "/home/user/code/php/my-another".to_string(),
             name: "my-project".to_string(),
             group: Some("PHP".to_string()),
             icon: Some(" ".to_string()),
