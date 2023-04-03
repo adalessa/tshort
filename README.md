@@ -11,16 +11,50 @@ Configurar los projectos en tu director `~/.config/projects.json`
 
 con la estructura
 ```json
+
 {
-  "projects": [
+  "directories": [
     {
-      "name": "php",
+      "name": "Rust",
+      "directory": "~/code/rust",
+      "icon": " ",
+      "color": "#cd9747"
+    },
+    {
+      "name": "Go",
+      "directory": "~/code/go",
+      "icon": " ",
+      "color": "#00a3cc"
+    },
+    {
+      "name": "PHP",
       "directory": "~/code/php",
       "icon": " ",
-      "color": "#0000ff"
+      "color": "#5e79be"
+    },
+    {
+      "name": "Javascript",
+      "directory": "~/code/javascript/",
+      "icon": " ",
+      "color": "#ecb75d"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Neovim",
+      "directory": "~/.config/nvim",
+      "icon": " ",
+      "color": "#509a3a"
+    },
+    {
+      "name": "Awesome",
+      "directory": "~/.config/awesome",
+      "icon": " ",
+      "color": "#535d6c"
     }
   ]
 }
+
 ```
 
 Con esto vas a poder rapidamente buscar en esos directorios tus projectos
