@@ -2,32 +2,83 @@
   description = "Tshort flake";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  };
-  outputs = { self, nixpkgs }:
-    let
-    system = "x86_64-linux";
-  pkgs = nixpkgs.legacyPackages.${system};
-  in
-  {
-    packages.${system}.default = pkgs.rustPlatform.buildRustPackage rec {
-      pname = "tshort";
-      version = "v0.1.4";
-
-      src = pkgs.fetchFromGitHub {
-        owner = "adalessa";
-        repo = pname;
-        rev = version;
-        sha256 = "MleotBL4T0tATZxe9ykc/PDufOaG2UdhMLspNX9I8d8=";
-      };
-
-      cargoSha256 = "e3H4v3BPfGOPPf4zpxUUgMCymdnQ6Kx6/vVR8GXz8bQ=";
-
-      meta = with pkgs.lib; {
-        description = "A cli tool to manage tmux session";
-        homepage = "https://github.com/adalessa/tshort";
-        license = licenses.unlicense;
-        maintainers = [ maintainers.tailhook ];
-      };
+    utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    crate2nix = {
+      url = "github:kolloch/crate2nix";
+      flake = false;
+    };
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
     };
   };
+  outputs = {
+    self,
+    nixpkgs,
+    utils,
+    rust-overlay,
+    crate2nix,
+    ...
+  }: let
+    name = "tshort";
+  in
+    utils.lib.eachDefaultSystem
+    (
+      system: let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            rust-overlay.overlay
+            (self: super: {
+              rustc = self.rust-bin.stable.latest.default;
+              cargo = self.rust-bin.stable.latest.default;
+            })
+          ];
+        };
+        inherit
+          (import "${crate2nix}/tools.nix" {inherit pkgs;})
+          generatedCargoNix
+          ;
+        project =
+          pkgs.callPackage
+          (generatedCargoNix {
+            inherit name;
+            src = ./.;
+          })
+          {
+            defaultCrateOverrides =
+              pkgs.defaultCrateOverrides
+              // {
+                ${name} = oldAttrs:
+                  {
+                    inherit buildInputs nativeBuildInputs;
+                  }
+                  // buildEnvVars;
+              };
+          };
+        buildInputs = with pkgs; [openssl.dev];
+        nativeBuildInputs = with pkgs; [rustc cargo pkgconfig nixpkgs-fmt];
+        buildEnvVars = {
+          PKGG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+        };
+      in rec {
+        packages.${name} = project.rootCrate.build;
+
+        defaultPackage = packages.${name};
+
+        apps.${name} = utils.lib.mkApp {
+          inherit name;
+          drv = packages.${name};
+        };
+
+        devShell =
+          pkgs.mkshell
+          {
+            inherit buildInputs nativeBuildInputs;
+            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rsutPkatform.rustLibSrc}";
+          }
+          // buildEnvVars;
+      }
+    );
 }
