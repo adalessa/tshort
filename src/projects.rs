@@ -9,7 +9,10 @@ const CACHE_FILE: &str = "~/.cache/tshort.json";
 
 pub fn get() -> HashMap<String, Project> {
     let mut projects: HashMap<String, Project> = match fs::read_to_string(get_cache_file_path()) {
-        Ok(data) => serde_json::from_str(&data).expect("JSON does not have correct format."),
+        Ok(data) => match serde_json::from_str(&data) {
+            Ok(data) => data,
+            Err(_) => HashMap::new(),
+        },
         Err(_) => HashMap::new(),
     };
     projects.retain(|_k, v| session::exists(&v.tmux_display()));
