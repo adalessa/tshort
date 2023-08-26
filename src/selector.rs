@@ -6,7 +6,7 @@ use std::{
 
 use crate::{project::Project, utils::config::Config};
 
-pub fn run(config: Config) -> Result<Project, io::Error> {
+pub fn run(config: &Config) -> Result<Project, io::Error> {
     let options = SkimOptionsBuilder::default()
         .height(Some("100%"))
         .multi(false)

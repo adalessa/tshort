@@ -26,6 +26,7 @@ pub mod session {
                 .session_name(item.tmux_display())
                 .detached()
                 .start_directory(item.path().to_str().unwrap())
+                // would like to have the posibility of the command to run
                 .shell_command(match std::env::var("EDITOR") {
                     Ok(val) => val,
                     Err(_) => String::from("nvim")
