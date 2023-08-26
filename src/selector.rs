@@ -1,12 +1,9 @@
 use skim::prelude::*;
-use std::{
-    fs,
-    io::{self, Error, ErrorKind},
-};
+use std::fs;
 
 use crate::{project::Project, utils::config::Config};
 
-pub fn run(config: &Config) -> Result<Project, io::Error> {
+pub fn run(config: &Config) -> Option<Project> {
     let options = SkimOptionsBuilder::default()
         .height(Some("100%"))
         .multi(false)
@@ -50,7 +47,7 @@ pub fn run(config: &Config) -> Result<Project, io::Error> {
             Key::Enter => out.selected_items,
             _ => Vec::new(),
         })
-        .unwrap_or_else(Vec::new)
+        .unwrap_or_default()
         .iter()
         .map(|selected_item| {
             (**selected_item)
@@ -62,10 +59,7 @@ pub fn run(config: &Config) -> Result<Project, io::Error> {
         .collect::<Vec<Project>>();
 
     let selected = selected_items.first();
-    if selected.is_none() {
-        let error = Error::new(ErrorKind::Other, "Nothing selected");
-        return Err(error);
-    }
+    selected?;
 
-    Ok(selected.unwrap().clone())
+    Some(selected.unwrap().clone())
 }

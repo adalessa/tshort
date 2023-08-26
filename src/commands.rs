@@ -23,8 +23,8 @@ impl Command for BindCommand {
             Some(key) => key,
             None => {
                 println!("No key provided");
-                return 1
-            },
+                return 1;
+            }
         };
 
         let mut projects = projects::get();
@@ -33,8 +33,8 @@ impl Command for BindCommand {
                 let success = session::connect(&item.tmux_display());
                 if !success {
                     let item = match selector::run(&self.config) {
-                        Ok(item) => item,
-                        Err(_e) => return 1,
+                        Some(item) => item,
+                        None => return 0,
                     };
 
                     let success = session::connect_or_create(item.to_owned());
@@ -46,8 +46,8 @@ impl Command for BindCommand {
             }
             None => {
                 let item = match selector::run(&self.config) {
-                    Ok(item) => item,
-                    Err(_e) => return 1,
+                    Some(item) => item,
+                    None => return 0,
                 };
 
                 let success = session::connect_or_create(item.to_owned());
@@ -81,8 +81,8 @@ impl Command for ForgetCommand {
             Some(key) => key,
             None => {
                 println!("No key provided");
-                return 1
-            },
+                return 1;
+            }
         };
         projects::remove_item(key);
 
@@ -146,8 +146,8 @@ impl DefaultCommand {
 impl Command for DefaultCommand {
     fn handle(&self) -> i32 {
         let item = match selector::run(&self.config) {
-            Ok(item) => item,
-            Err(_e) => return 1,
+            Some(item) => item,
+            None => return 0,
         };
 
         session::connect_or_create(item);
