@@ -7,6 +7,7 @@ pub fn run(config: &Config) -> Option<Project> {
     let options = SkimOptionsBuilder::default()
         .height(Some("100%"))
         .multi(false)
+        .preview(Some(""))
         .build()
         .unwrap();
 

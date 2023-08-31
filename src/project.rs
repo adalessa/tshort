@@ -2,6 +2,7 @@ use std::{borrow::Cow, path::Path};
 
 use raster::Color;
 use serde::{Deserialize, Serialize};
+use skim::prelude::*;
 use skim::{AnsiString, DisplayContext, SkimItem};
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -75,6 +76,17 @@ impl SkimItem for Project {
 
     fn display<'a>(&'a self, _context: DisplayContext<'a>) -> AnsiString<'a> {
         AnsiString::parse(&self.skim_display())
+    }
+
+    fn preview(&self, _context: PreviewContext) -> ItemPreview {
+        let readme_path = self.path().join("README.md");
+
+        // if file does not exists return string "No README.md found"
+        if !readme_path.exists() {
+            return ItemPreview::Text("No README.md found".to_string());
+        }
+
+        ItemPreview::Command("bat --color always ".to_string() + readme_path.to_str().unwrap())
     }
 }
 
