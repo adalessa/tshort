@@ -79,14 +79,26 @@ impl SkimItem for Project {
     }
 
     fn preview(&self, _context: PreviewContext) -> ItemPreview {
-        let readme_path = self.path().join("README.md");
+        let possible_files = vec![
+            "README.md",
+            "readme.md",
+            "Readme.md",
+            "README.MD",
+            "Readme.MD",
+            "ReadMe.md",
+            "ReadMe.MD",
+        ];
 
-        // if file does not exists return string "No README.md found"
-        if !readme_path.exists() {
-            return ItemPreview::Text("No README.md found".to_string());
+        for file in &possible_files {
+            let readme_path = self.path().join(file);
+            if readme_path.exists() {
+                return ItemPreview::Command(
+                    "bat --color always ".to_string() + readme_path.to_str().unwrap(),
+                );
+            }
         }
 
-        ItemPreview::Command("bat --color always ".to_string() + readme_path.to_str().unwrap())
+        return ItemPreview::Text("No README.md found".to_string());
     }
 }
 
