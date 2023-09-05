@@ -58,7 +58,7 @@
               };
           };
         buildInputs = with pkgs; [openssl.dev];
-        nativeBuildInputs = with pkgs; [rustc cargo pkgconfig nixpkgs-fmt];
+        nativeBuildInputs = with pkgs; [rustc cargo pkgconfig nixpkgs-fmt rust-analyzer];
         buildEnvVars = {
           PKGG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
         };
@@ -73,10 +73,10 @@
         };
 
         devShell =
-          pkgs.mkshell
+          pkgs.mkShell
           {
             inherit buildInputs nativeBuildInputs;
-            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rsutPkatform.rustLibSrc}";
+            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
           }
           // buildEnvVars;
       }

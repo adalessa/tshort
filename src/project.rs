@@ -14,6 +14,21 @@ pub struct Project {
     pub color: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ProjectConfig {
+    pub cmd: String,
+}
+
+impl ProjectConfig {
+    pub fn default() -> Self {
+        let command = match std::env::var("EDITOR") {
+            Ok(editor) => editor,
+            Err(_) => "nvim".to_string(),
+        };
+        ProjectConfig { cmd: command }
+    }
+}
+
 impl Project {
     pub fn session_name(&self) -> Cow<str> {
         Cow::from(format!(
@@ -67,6 +82,21 @@ impl Project {
     pub fn path(&self) -> &Path {
         Path::new(&self.path)
     }
+
+    pub fn get_command(&self) -> ProjectConfig {
+        let tmux_file = self.path().join(".tshort.json");
+
+        match tmux_file.exists() {
+            true => match std::fs::read_to_string(tmux_file) {
+                Ok(data) => match serde_json::from_str(&data) {
+                    Ok(data) => data,
+                    Err(_) => ProjectConfig::default(),
+                },
+                Err(_) => ProjectConfig::default(),
+            },
+            false => ProjectConfig::default(),
+        }
+    }
 }
 
 impl SkimItem for Project {
@@ -98,7 +128,7 @@ impl SkimItem for Project {
             }
         }
 
-        return ItemPreview::Text("No README.md found".to_string());
+        ItemPreview::Text("No README.md found".to_string())
     }
 }
 

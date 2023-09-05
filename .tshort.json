@@ -1,0 +1,3 @@
+{
+  "cmd": "nix develop --command nvim"
+}

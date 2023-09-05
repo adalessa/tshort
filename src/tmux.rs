@@ -1,39 +1,31 @@
 pub mod session {
     use crate::project::Project;
-    use tmux_interface::{NewSession, TmuxCommand};
+    use tmux_interface::{HasSession, NewSession, SwitchClient, Tmux};
 
     pub fn exists(session_name: &str) -> bool {
-        TmuxCommand::new()
-            .has_session()
-            .target_session(session_name)
-            .output()
+        Tmux::with_command(HasSession::new().target_session(session_name))
+            .status()
             .unwrap()
             .success()
     }
 
     pub fn connect(session_name: &str) -> bool {
-        TmuxCommand::new()
-            .switch_client()
-            .target_session(session_name)
-            .output()
+        Tmux::with_command(SwitchClient::new().target_session(session_name))
+            .status()
             .unwrap()
             .success()
     }
 
     pub fn create(item: Project) -> bool {
         if !exists(&item.session_name()) {
-            return NewSession::new()
-                .session_name(item.tmux_display())
-                .detached()
-                .start_directory(item.path().to_str().unwrap())
-                // would like to have the posibility of the command to run
-                .shell_command(match std::env::var("EDITOR") {
-                    Ok(val) => val,
-                    Err(_) => String::from("nvim")
-                })
-                .output()
-                .unwrap()
-                .success();
+            Tmux::with_command(
+                NewSession::new()
+                    .detached()
+                    .session_name(item.tmux_display())
+                    .shell_command(item.get_command().cmd)
+            )
+            .output()
+            .unwrap();
         }
 
         true
