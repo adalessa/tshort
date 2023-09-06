@@ -22,6 +22,7 @@ pub mod session {
                 NewSession::new()
                     .detached()
                     .session_name(item.tmux_display())
+                    .start_directory(item.path().to_str().unwrap())
                     .shell_command(item.get_command().cmd)
             )
             .output()
