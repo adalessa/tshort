@@ -3,7 +3,7 @@
 in
   pkgs.rustPlatform.buildRustPackage rec {
     name = manifest.name;
-    versions = manifest.version;
+    version = manifest.version;
     cargoLock.lockFile = ./Cargo.lock;
     src = pkgs.lib.cleanSource ./.;
   }
