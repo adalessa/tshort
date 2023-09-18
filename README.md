@@ -73,3 +73,6 @@ Para tener informacion de los projectos bindeados el comando `tshort list` me da
 Tambien estan los comandos
 - `tshort` sin argumentos que va a simplemente listar y cambiar de session
 - `tshort forget {key}` que va a borrar la asociacion pero sin cerrar la session.
+
+Para evitar que la terminal se cierre cuando se cierra una session agregar esta opcion a tmux
+`set-option -g detach-on-destroy off` que evitara eso.

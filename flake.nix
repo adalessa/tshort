@@ -14,5 +14,10 @@
     in {
       packages.default = pkgs.callPackage ./default.nix {};
       devShells.default = pkgs.callPackage ./shell.nix {};
-    });
+    })
+    // {
+      overlay = final: prev: {
+        tshort = import ./default.nix {pkgs = final;};
+      };
+    };
 }
